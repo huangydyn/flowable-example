@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://www.flowable.org/processdef">
+
+    <!--    <process id="example" name="BPMN2 Example exclusive gateway">-->
+
+    <!--        <startEvent id="start"/>-->
+
+    <!--        <sequenceFlow id="flow1" name="fromStartToExclusiveGateway"-->
+    <!--                      sourceRef="start" targetRef="decideBasedOnAmountGateway"/>-->
+
+    <!--        <exclusiveGateway id="decideBasedOnAmountGateway" name="decideBasedOnAmount"/>-->
+
+    <!--        <sequenceFlow id="flow2" name="fromGatewayToEndNotEnough"-->
+    <!--                      sourceRef="decideBasedOnAmountGateway" targetRef="endNotEnough">-->
+    <!--            <conditionExpression xsi:type="tFormalExpression">-->
+    <!--                <![CDATA[${amount<100}]]>-->
+    <!--            </conditionExpression>-->
+    <!--        </sequenceFlow>-->
+
+    <!--        <sequenceFlow id="flow3" name="fromGatewayToEnEnough"-->
+    <!--                      sourceRef="decideBasedOnAmountGateway" targetRef="endEnough">-->
+    <!--            <conditionExpression xsi:type="tFormalExpression">-->
+    <!--                <![CDATA[${amount >= 100}]]>-->
+    <!--            </conditionExpression>-->
+    <!--        </sequenceFlow>-->
+
+    <!--        <serviceTask id="endNotEnough" name="endNotEnough"-->
+    <!--                     flowable:class="com.template.handler.NotEnoughHandler"/>-->
+    <!--        <sequenceFlow sourceRef="endNotEnough" targetRef="approveEnd"/>-->
+
+    <!--        <userTask id="endEnough" name="经理审批" flowable:assignee="manager"/>-->
+    <!--        <sequenceFlow sourceRef="endEnough" targetRef="rejectEnd"/>-->
+
+    <!--&lt;!&ndash;        <serviceTask id="endEnough" name="endEnough"&ndash;&gt;-->
+    <!--&lt;!&ndash;                     flowable:class="com.template.handler.EnoughHandler"/>&ndash;&gt;-->
+    <!--&lt;!&ndash;        <sequenceFlow sourceRef="endEnough" targetRef="rejectEnd"/>&ndash;&gt;-->
+
+    <!--        <endEvent id="approveEnd"/>-->
+
+    <!--        <endEvent id="rejectEnd"/>-->
+    <!--    </process>-->
+
+    <process id="articleReview"
+             name="A simple process for article review." isExecutable="true">
+        <startEvent id="start"/>
+        <sequenceFlow sourceRef="start" targetRef="reviewArticle"/>
+        <userTask id="reviewArticle" name="Review the submitted tutorial"
+                  flowable:candidateGroups="editors"/>
+        <!--        <sequenceFlow sourceRef="reviewArticle" targetRef="decision" />-->
+        <!--        <exclusiveGateway id="decision" />-->
+        <sequenceFlow sourceRef="reviewArticle" targetRef="tutorialApproved">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${approved}]]>
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow sourceRef="reviewArticle" targetRef="tutorialRejected">
+            <conditionExpression xsi:type="tFormalExpression">
+                <![CDATA[${!approved}]]>
+            </conditionExpression>
+        </sequenceFlow>
+        <serviceTask id="tutorialApproved" name="Publish the approved tutorial."
+                     flowable:class="com.template.handler.PublishArticleHandler"/>
+        <sequenceFlow sourceRef="tutorialApproved" targetRef="end"/>
+        <serviceTask id="tutorialRejected" name="Send out rejection email"
+                     flowable:class="com.template.handler.SendMailHandler"/>
+        <sequenceFlow sourceRef="tutorialRejected" targetRef="end"/>
+        <endEvent id="end"/>
+    </process>
+</definitions>
